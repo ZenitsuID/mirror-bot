@@ -365,14 +365,8 @@ def _mirror(bot, message, isZip=False, extract=False, isQbit=False, isLeech=Fals
             pass
 
     if not is_url(link) and not is_magnet(link) and not ospath.exists(link):
-        help_msg = "<b>Send link along with command line:</b>"
-        help_msg += "\n<code>/command</code> {link} |newname pswd: xx [zip/unzip]"
-        help_msg += "\n\n<b>By replying to link or file:</b>"
-        help_msg += "\n<code>/command</code> |newname pswd: xx [zip/unzip]"
-        help_msg += "\n\n<b>Direct link authorization:</b>"
-        help_msg += "\n<code>/command</code> {link} |newname pswd: xx\nusername\npassword"
-        help_msg += "\n\n<b>Qbittorrent selection:</b>"
-        help_msg += "\n<code>/qbcommand</code> <b>s</b> {link} or by replying to {file}"
+        help_msg = "<b>Link nya mana bambank 🙀</b>"
+        help_msg += "\nMirror link bokep gua jitak lu 😾"
         return sendMessage(help_msg, bot, message)
 
     LOGGER.info(link)
