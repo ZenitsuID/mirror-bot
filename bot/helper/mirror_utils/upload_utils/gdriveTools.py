@@ -372,7 +372,7 @@ class GoogleDriveHelper:
                     buttons.buildbutton("⚡ Index Link ⚡", url)
             else:
                 file = self.__copyFile(meta.get('id'), parent_id)
-                msg += f'<b>Name: </b><code>{file.get("name")}</code>'
+                msg += f'<b>📁 Filename: </b><code>{file.get("name")}</code>'
                 durl = self.__G_DRIVE_BASE_DOWNLOAD_URL.format(file.get("id"))
                 buttons = ButtonMaker()
                 durl = short_url(durl)
@@ -381,7 +381,8 @@ class GoogleDriveHelper:
                     mime_type = 'File'
                 msg += f'\n<b>📦 Size: </b>{get_readable_file_size(int(meta.get("size", 0)))}'
                 msg += f'\n<b>🌀 Type: </b>{mime_type}'
-                msg += f'\n\n<b>🗳 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗕𝘆</b> @ZenitsuXD'
+                msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
+            msg += f'\n\n<b>🗳 Powered By</b> @ZenitsuXD'
                 if INDEX_URL is not None:
                     url_path = rquote(f'{file.get("name")}')
                     url = f'{INDEX_URL}/{url_path}'
@@ -768,7 +769,8 @@ class GoogleDriveHelper:
                 msg += f'\n<b>📦 Size: </b>{get_readable_file_size(self.__total_bytes)}'
                 msg += f'\n<b>🌀 Type: </b>{mime_type}'
                 msg += f'\n<b>📂 Files: </b>{self.__total_files}'
-                msg += f'\n\n<b>🗳 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗕𝘆</b> @ZenitsuXD'
+                msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
+                msg += f'\n\n<b>🗳 Powered By</b> @ZenitsuXD'
         except Exception as err:
             if isinstance(err, RetryError):
                 LOGGER.info(f"Total Attempts: {err.last_attempt.attempt_number}")

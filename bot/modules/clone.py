@@ -80,7 +80,7 @@ def cloneNode(update, context):
                     update_all_messages()
             except IndexError:
                 pass
-        cc = f'\n\n<b>cc: </b>{tag}'
+        cc = f'\n<b>👤 By: </b>{tag}'
         if button in ["cancelled", ""]:
             sendMessage(f"{tag} {result}", context.bot, update.message)
         else:
