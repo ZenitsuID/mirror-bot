@@ -18,7 +18,7 @@ def cancel_mirror(update, context):
         gid = args[1]
         dl = getDownloadByGid(gid)
         if not dl:
-            sendMessage(f"GID: <code>{gid}</code> Tidak ditemukan.", context.bot, update)
+            sendMessage(f"GID: <code>{gid}</code> Not Found.", context.bot, update.message)
             return
         mirror_message = dl.message
     elif update.message.reply_to_message:
@@ -32,15 +32,15 @@ def cancel_mirror(update, context):
     if len(args) == 1 and (
         not mirror_message or mirror_message.message_id not in keys
     ):
-        msg = f"Balas ke pesan aktif <code>/{BotCommands.MirrorCommand}</code> yang digunakan untuk memulai pengunduhan atau pengiriman <code>/{BotCommands.CancelMirror} GID</code> untuk membatalkannya!"
-        sendMessage(msg, context.bot, update)
+        msg = f"Reply to active <code>/{BotCommands.MirrorCommand}</code> message which was used to start the download or send <code>/{BotCommands.CancelMirror} GID</code> to cancel it!"
+        sendMessage(msg, context.bot, update.message)
         return
     if dl.status() == MirrorStatus.STATUS_ARCHIVING:
-        sendMessage("Pengarsipan Sedang Berlangsung, Anda Tidak Dapat Membatalkannya.", context.bot, update)
+        sendMessage("Archival in Progress, You Can't Cancel It.", context.bot, update.message)
     elif dl.status() == MirrorStatus.STATUS_EXTRACTING:
-        sendMessage("Ekstrak Sedang Berlangsung, Anda Tidak Dapat Membatalkannya.", context.bot, update)
+        sendMessage("Extract in Progress, You Can't Cancel It.", context.bot, update.message)
     elif dl.status() == MirrorStatus.STATUS_SPLITTING:
-        sendMessage("Split Sedang Berlangsung, Anda Tidak Dapat Membatalkannya.", context.bot, update)
+        sendMessage("Split in Progress, You Can't Cancel It.", context.bot, update.message)
     else:
         dl.download().cancel_download()
 
@@ -58,14 +58,14 @@ def cancel_all(status):
 
 def cancell_all_buttons(update, context):
     buttons = button_build.ButtonMaker()
-    buttons.sbutton("Mengunduh", "canall down")
-    buttons.sbutton("Mengunggah", "canall up")
+    buttons.sbutton("Downloading", "canall down")
+    buttons.sbutton("Uploading", "canall up")
     if QB_SEED:
         buttons.sbutton("Seeding", "canall seed")
     buttons.sbutton("Cloning", "canall clone")
-    buttons.sbutton("Semua", "canall all")
+    buttons.sbutton("All", "canall all")
     button = InlineKeyboardMarkup(buttons.build_menu(2))
-    sendMarkup('Pilih tugas untuk dibatalkan.', context.bot, update, button)
+    sendMarkup('Choose tasks to cancel.', context.bot, update.message, button)
 
 def cancel_all_update(update, context):
     query = update.callback_query
@@ -77,7 +77,7 @@ def cancel_all_update(update, context):
         query.message.delete()
         cancel_all(data[1])
     else:
-        query.answer(text="Anda tidak memiliki izin untuk menggunakan tombol ini!", show_alert=True)
+        query.answer(text="You don't have permission to use these buttons!", show_alert=True)
 
 
 

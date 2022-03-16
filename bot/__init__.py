@@ -41,7 +41,7 @@ try:
             with open('.netrc', 'wb+') as f:
                 f.write(res.content)
         else:
-            logging.error(f"Gagal mengunduh .netrc {res.status_code}")
+            logging.error(f"Failed to download .netrc {res.status_code}")
     except Exception as e:
         logging.error(f"NETRC_URL: {e}")
 except KeyError:
@@ -246,6 +246,14 @@ try:
         raise KeyError
 except KeyError:
     SEARCH_API_LINK = None
+try:
+    SEARCH_LIMIT = getConfig('SEARCH_LIMIT')
+    if len(SEARCH_LIMIT) == 0:
+        raise KeyError
+    else:
+        SEARCH_LIMIT = int(SEARCH_LIMIT)
+except KeyError:
+    SEARCH_LIMIT = 0
 try:
     RSS_COMMAND = getConfig('RSS_COMMAND')
     if len(RSS_COMMAND) == 0:

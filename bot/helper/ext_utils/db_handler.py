@@ -13,7 +13,7 @@ class DbManger:
             self.conn = connect(DB_URI)
             self.cur = self.conn.cursor()
         except DatabaseError as error:
-            LOGGER.error(f"Kesalahan dalam koneksi DB: {error}")
+            LOGGER.error(f"Error in DB connection: {error}")
             self.err = True
 
     def disconnect(self):
@@ -23,7 +23,7 @@ class DbManger:
     def db_init(self):
         if self.err:
             return
-        sql = """BUAT TABEL JIKA TIDAK ADA pengguna (
+        sql = """CREATE TABLE IF NOT EXISTS users (
                  uid bigint,
                  sudo boolean DEFAULT FALSE,
                  auth boolean DEFAULT FALSE,
@@ -33,7 +33,7 @@ class DbManger:
               )
               """
         self.cur.execute(sql)
-        sql = """BUAT TABEL JIKA TIDAK ADA rss (
+        sql = """CREATE TABLE IF NOT EXISTS rss (
                  name text,
                  link text,
                  last text,
@@ -43,12 +43,12 @@ class DbManger:
               """
         self.cur.execute(sql)
         self.conn.commit()
-        LOGGER.info("Basis Data Dimulai")
+        LOGGER.info("Database Initiated")
         self.db_load()
 
     def db_load(self):
         # User Data
-        self.cur.execute("PILIH * dari pengguna")
+        self.cur.execute("SELECT * from users")
         rows = self.cur.fetchall()  #returns a list ==> (uid, sudo, auth, media, doc, thumb)
         if rows:
             for row in rows:
@@ -66,9 +66,9 @@ class DbManger:
                         makedirs('Thumbnails')
                     with open(path, 'wb+') as f:
                         f.write(row[5])
-            LOGGER.info("Data pengguna telah diimpor dari Database")
+            LOGGER.info("Users data has been imported from Database")
         # Rss Data
-        self.cur.execute("PILIH * dari rss")
+        self.cur.execute("SELECT * FROM rss")
         rows = self.cur.fetchall()  #returns a list ==> (name, feed_link, last_link, last_title, filters)
         if rows:
             for row in rows:
@@ -79,30 +79,30 @@ class DbManger:
                         y = x.split(' or ')
                         f_lists.append(y)
                 rss_dict[row[0]] = [row[1], row[2], row[3], f_lists]
-            LOGGER.info("Data Rss telah diimpor dari Database.")
+            LOGGER.info("Rss data has been imported from Database.")
         self.disconnect()
 
     def user_auth(self, chat_id: int):
         if self.err:
-            return "Kesalahan dalam koneksi DB, periksa log untuk detailnya"
+            return "Error in DB connection, check log for details"
         elif not self.user_check(chat_id):
-            sql = 'MASUKKAN KE pengguna (uid, auth) NILAI ({}, TRUE)'.format(chat_id)
+            sql = 'INSERT INTO users (uid, auth) VALUES ({}, TRUE)'.format(chat_id)
         else:
-            sql = 'UPDATE pengguna SET auth = TRUE DI MANA uid = {}'.format(chat_id)
+            sql = 'UPDATE users SET auth = TRUE WHERE uid = {}'.format(chat_id)
         self.cur.execute(sql)
         self.conn.commit()
         self.disconnect()
-        return 'Diotorisasi dengan sukses'
+        return 'Authorized successfully'
 
     def user_unauth(self, chat_id: int):
         if self.err:
-            return "Kesalahan dalam koneksi DB, periksa log untuk detailnya"
+            return "Error in DB connection, check log for details"
         elif self.user_check(chat_id):
-            sql = 'UPDATE pengguna SET auth = FALSE DI MANA uid = {}'.format(chat_id)
+            sql = 'UPDATE users SET auth = FALSE WHERE uid = {}'.format(chat_id)
             self.cur.execute(sql)
             self.conn.commit()
             self.disconnect()
-            return 'Berhasil tidak diotorisasi'
+            return 'Unauthorized successfully'
 
     def user_addsudo(self, user_id: int):
         if self.err:
