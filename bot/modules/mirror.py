@@ -186,7 +186,7 @@ class MirrorListener:
             update_all_messages()
 
     def onUploadComplete(self, link: str, size, files, folders, typ, name: str):
-        msg = f'<b>📂 Filename: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}'
+        msg = f'<b>📂 Filename: </b><code>{escape(name)}</code>\n<b>📦 Size: </b>{size}'
         if self.isLeech:
             count = len(files)
             msg += f'\n<b>🗂️ Total Files: </b>{count}'
@@ -222,10 +222,11 @@ class MirrorListener:
         else:
             msg += f'\n<b>🌀 Type: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
-                msg += f'\n<b>🗂️ SubFolders: </b>{folders}'
-                msg += f'\n<b>📂 Files: </b>{files}'
+            msg += f'\n<b>🗂️ SubFolders: </b>{folders}'
+            msg += f'\n<b>📂 Files: </b>{files}'
+            msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
             msg += f'\n<b>👤 By: </b>{self.tag}'
-            msg += f'\n\n<b>🗳 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗕𝘆</b> @ZenitsuXD'
+            msg += f'\n\n<b>🗳 Powered By</b> @ZenitsuXD'
             buttons = ButtonMaker()
             link = short_url(link)
             buttons.buildbutton("♻️ Drive Link ♻️", link)
@@ -243,7 +244,7 @@ class MirrorListener:
                     if VIEW_LINK:
                         share_urls = f'{INDEX_URL}/{url_path}?a=view'
                         share_urls = short_url(share_urls)
-                        buttons.buildbutton("🌐 View Linkb🌐", share_urls)
+                        buttons.buildbutton("🌐 View Link🌐", share_urls)
             if BUTTON_FOUR_NAME is not None and BUTTON_FOUR_URL is not None:
                 buttons.buildbutton(f"{BUTTON_FOUR_NAME}", f"{BUTTON_FOUR_URL}")
             if BUTTON_FIVE_NAME is not None and BUTTON_FIVE_URL is not None:
