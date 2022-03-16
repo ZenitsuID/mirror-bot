@@ -34,7 +34,7 @@ def cloneNode(update, context):
     is_gdtot = is_gdtot_link(link)
     if is_gdtot:
         try:
-            msg = sendMessage(f"Processing: <code>{link}</code>", context.bot, update)
+            msg = sendMessage(f"Silahkan Tunggu: <code>{link}</code>", context.bot, update)
             link = gdtot(link)
             deleteMessage(context.bot, msg)
         except DirectDownloadLinkException as e:
@@ -46,15 +46,15 @@ def cloneNode(update, context):
         if res != "":
             return sendMessage(res, context.bot, update)
         if STOP_DUPLICATE:
-            LOGGER.info('Checking File/Folder if already in Drive...')
+            LOGGER.info('Memeriksa File/Folder jika sudah di Drive...')
             smsg, button = gd.drive_list(name, True, True)
             if smsg:
-                msg3 = "File/Folder is already available in Drive.\nHere are the search results:"
+                msg3 = "File/Folder sudah tersedia di Drive.\nBerikut adalah hasil pencariannya:"
                 return sendMarkup(msg3, context.bot, update, button)
         if CLONE_LIMIT is not None:
-            LOGGER.info('Checking File/Folder Size...')
+            LOGGER.info('Memeriksa Ukuran File/Folder...')
             if size > CLONE_LIMIT * 1024**3:
-                msg2 = f'Failed, Clone limit is {CLONE_LIMIT}GB.\nYour File/Folder size is {get_readable_file_size(size)}.'
+                msg2 = f'Gagal, batas Clone adalah {CLONE_LIMIT}GB.\nUkuran File/Folder Anda adalah {get_readable_file_size(size)}.'
                 return sendMessage(msg2, context.bot, update)
         if files <= 20:
             msg = sendMessage(f"Cloning: <code>{link}</code>", context.bot, update)
@@ -81,14 +81,14 @@ def cloneNode(update, context):
             except IndexError:
                 pass
         cc = f'\n\n<b>cc: </b>{tag}'
-        if button in ["cancelled", ""]:
+        if button in ["dibatalkan", ""]:
             sendMessage(f"{tag} {result}", context.bot, update)
         else:
             sendMarkup(result + cc, context.bot, update, button)
         if is_gdtot:
             gd.deletefile(link)
     else:
-        sendMessage('Send Gdrive or gdtot link along with command or by replying to the link by command', context.bot, update)
+        sendMessage('Kirim tautan Gdrive atau gdtot bersama dengan perintah atau dengan membalas tautan dengan perintah', context.bot, update)
 
 clone_handler = CommandHandler(BotCommands.CloneCommand, cloneNode, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 dispatcher.add_handler(clone_handler)

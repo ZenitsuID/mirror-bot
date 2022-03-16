@@ -14,7 +14,7 @@ def authorize(update, context):
     if len(message_) == 2:
         user_id = int(message_[1])
         if user_id in AUTHORIZED_CHATS:
-            msg = 'User Already Authorized!'
+            msg = 'Pengguna Sudah Di Ijinkan!'
         elif DB_URI is not None:
             msg = DbManger().user_auth(user_id)
             AUTHORIZED_CHATS.add(user_id)
@@ -22,12 +22,12 @@ def authorize(update, context):
             AUTHORIZED_CHATS.add(user_id)
             with open('authorized_chats.txt', 'a') as file:
                 file.write(f'{user_id}\n')
-                msg = 'User Authorized'
+                msg = 'Pengguna Di Ijinkan'
     elif reply_message is None:
         # Trying to authorize a chat
         chat_id = update.effective_chat.id
         if chat_id in AUTHORIZED_CHATS:
-            msg = 'Chat Already Authorized!'
+            msg = 'Obrolan Sudah Di Ijinkan!'
         elif DB_URI is not None:
             msg = DbManger().user_auth(chat_id)
             AUTHORIZED_CHATS.add(chat_id)
@@ -35,12 +35,12 @@ def authorize(update, context):
             AUTHORIZED_CHATS.add(chat_id)
             with open('authorized_chats.txt', 'a') as file:
                 file.write(f'{chat_id}\n')
-                msg = 'Chat Authorized'
+                msg = 'Obrolan Di Ijinkan'
     else:
         # Trying to authorize someone by replying
         user_id = reply_message.from_user.id
         if user_id in AUTHORIZED_CHATS:
-            msg = 'User Already Authorized!'
+            msg = 'Pengguna Sudah Di Ijinkan!'
         elif DB_URI is not None:
             msg = DbManger().user_auth(user_id)
             AUTHORIZED_CHATS.add(user_id)
@@ -48,7 +48,7 @@ def authorize(update, context):
             AUTHORIZED_CHATS.add(user_id)
             with open('authorized_chats.txt', 'a') as file:
                 file.write(f'{user_id}\n')
-                msg = 'User Authorized'
+                msg = 'Pengguna Di Ijinkan'
     sendMessage(msg, context.bot, update)
 
 def unauthorize(update, context):
@@ -62,10 +62,10 @@ def unauthorize(update, context):
             if DB_URI is not None:
                 msg = DbManger().user_unauth(user_id)
             else:
-                msg = 'User Unauthorized'
+                msg = 'Pengguna Tidak Lagi Di Ijinkan'
             AUTHORIZED_CHATS.remove(user_id)
         else:
-            msg = 'User Already Unauthorized!'
+            msg = 'Pengguna Sudah Tidak Lagi Di Ijinkan!'
     elif reply_message is None:
         # Trying to unauthorize a chat
         chat_id = update.effective_chat.id

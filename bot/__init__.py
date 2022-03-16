@@ -41,7 +41,7 @@ try:
             with open('.netrc', 'wb+') as f:
                 f.write(res.content)
         else:
-            logging.error(f"Failed to download .netrc {res.status_code}")
+            logging.error(f"Gagal mengunduh .netrc {res.status_code}")
     except Exception as e:
         logging.error(f"NETRC_URL: {e}")
 except KeyError:

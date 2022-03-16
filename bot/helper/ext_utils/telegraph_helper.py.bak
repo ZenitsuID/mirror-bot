@@ -27,7 +27,7 @@ class TelegraphHelper:
 			author_url=self.author_url
 		)
 		self.access_token = self.telegraph.get_access_token()
-		LOGGER.info(f"Membuat Akun TELEGRAF menggunakan nama '{self.short_name}'")
+		LOGGER.info(f"Creating TELEGRAPH Account using  '{self.short_name}' name")
 
 	def create_page(self, title, content):
 		try:
@@ -38,7 +38,7 @@ class TelegraphHelper:
 				html_content=content
 			)
 		except RetryAfterError as st:
-			LOGGER.warning(f'Kontrol banjir Telegraph terlampaui. Saya akan tidur selama {st.retry_after} detik.')
+			LOGGER.warning(f'Telegraph Flood control exceeded. I will sleep for {st.retry_after} seconds.')
 			sleep(st.retry_after)
 			return self.create_page(title, content)
 
@@ -52,9 +52,9 @@ class TelegraphHelper:
 				html_content=content
 			)
 		except RetryAfterError as st:
-			LOGGER.warning(f'Kontrol banjir Telegraph terlampaui. Saya akan tidur selama {st.retry_after} detik.')
+			LOGGER.warning(f'Telegraph Flood control exceeded. I will sleep for {st.retry_after} seconds.')
 			sleep(st.retry_after)
 			return self.edit_page(path, title, content)
 
 
-telegraph=TelegraphHelper('Mirror-Bot', 'https://github.com/Zenitsu-ID/mirror-bot')
+telegraph=TelegraphHelper('Mirror-Leech-Telegram-Bot', 'https://github.com/anasty17/mirror-leech-telegram-bot')

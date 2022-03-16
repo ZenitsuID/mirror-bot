@@ -62,7 +62,7 @@ class MirrorListener:
 
     def onDownloadComplete(self):
         with download_dict_lock:
-            LOGGER.info(f"Download completed: {download_dict[self.uid].name()}")
+            LOGGER.info(f"Unduh selesai: {download_dict[self.uid].name()}")
             download = download_dict[self.uid]
             name = str(download.name()).replace('/', '')
             gid = download.gid()
@@ -89,8 +89,8 @@ class MirrorListener:
                 else:
                     srun(["7z", "a", "-mx=0", path, m_path])
             except FileNotFoundError:
-                LOGGER.info('File to archive not found!')
-                self.onUploadError('Internal error occurred!!')
+                LOGGER.info('File ke arsip tidak ditemukan!')
+                self.onUploadError('Terjadi kesalahan internal!!')
                 return
             if not self.isQbit or not QB_SEED or self.isLeech:
                 try:
@@ -101,7 +101,7 @@ class MirrorListener:
             try:
                 if ospath.isfile(m_path):
                     path = get_base_name(m_path)
-                LOGGER.info(f"Extracting: {name}")
+                LOGGER.info(f"Sedang Mengekstrak: {name}")
                 with download_dict_lock:
                     download_dict[self.uid] = ExtractStatus(name, m_path, size)
                 pswd = self.pswd
@@ -117,7 +117,7 @@ class MirrorListener:
                                 else:
                                     result = srun(["7z", "x", m_path, f"-o{dirpath}", "-aot"])
                                 if result.returncode != 0:
-                                    LOGGER.error('Unable to extract archive!')
+                                    LOGGER.error('Tidak dapat mengekstrak arsip!')
                         for file_ in files:
                             if file_.endswith(".rar") or search(r'\.r\d+$', file_) \
                                or search(r'\.7z.\d+$', file_) or search(r'\.z\d+$', file_) \
@@ -131,14 +131,14 @@ class MirrorListener:
                     else:
                         result = srun(["bash", "extract", m_path])
                     if result.returncode == 0:
-                        LOGGER.info(f"Extract Path: {path}")
+                        LOGGER.info(f"Ekstrak arsip: {path}")
                         osremove(m_path)
-                        LOGGER.info(f"Deleting archive: {m_path}")
+                        LOGGER.info(f"Menghapus arsip: {m_path}")
                     else:
-                        LOGGER.error('Unable to extract archive! Uploading anyway')
+                        LOGGER.error('Tidak dapat mengekstrak arsip! Tetap mengupload')
                         path = f'{DOWNLOAD_DIR}{self.uid}/{name}'
             except NotSupportedExtractionArchive:
-                LOGGER.info("Not any valid archive, uploading file as it is.")
+                LOGGER.info("Bukan arsip yang valid, mengunggah file apa adanya.")
                 path = f'{DOWNLOAD_DIR}{self.uid}/{name}'
         else:
             path = f'{DOWNLOAD_DIR}{self.uid}/{name}'
@@ -160,7 +160,7 @@ class MirrorListener:
                         osremove(f_path)
         if self.isLeech:
             size = get_path_size(f'{DOWNLOAD_DIR}{self.uid}')
-            LOGGER.info(f"Leech Name: {up_name}")
+            LOGGER.info(f"Nama Leech: {up_name}")
             tg = TgUploader(up_name, self)
             tg_upload_status = TgUploadStatus(tg, size, gid, self)
             with download_dict_lock:
@@ -169,7 +169,7 @@ class MirrorListener:
             tg.upload()
         else:
             size = get_path_size(up_path)
-            LOGGER.info(f"Upload Name: {up_name}")
+            LOGGER.info(f"Nama Unggahan: {up_name}")
             drive = GoogleDriveHelper(up_name, self)
             upload_status = UploadStatus(drive, size, gid, self)
             with download_dict_lock:
@@ -187,7 +187,7 @@ class MirrorListener:
             except Exception as e:
                 LOGGER.error(str(e))
             count = len(download_dict)
-        msg = f"{self.tag} your download has been stopped due to: {error}"
+        msg = f"{self.tag} unduhan Anda telah dihentikan karena: {error}"
         sendMessage(msg, self.bot, self.update)
         if count == 0:
             self.clean()
@@ -195,12 +195,12 @@ class MirrorListener:
             update_all_messages()
 
     def onUploadComplete(self, link: str, size, files, folders, typ, name: str):
-        msg = f'<b>Name: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}'
+        msg = f'<b>Nama: </b><code>{escape(name)}</code>\n\n<b>Size: </b>{size}'
         if self.isLeech:
             count = len(files)
-            msg += f'\n<b>Total Files: </b>{count}'
+            msg += f'\n<b>Jumlah File: </b>{count}'
             if typ != 0:
-                msg += f'\n<b>Corrupted Files: </b>{typ}'
+                msg += f'\n<b>File Rusak: </b>{typ}'
             msg += f'\n<b>cc: </b>{self.tag}\n\n'
             if self.message.chat.type == 'private':
                 sendMessage(msg, self.bot, self.update)
@@ -229,15 +229,15 @@ class MirrorListener:
             else:
                 update_all_messages()
         else:
-            msg += f'\n\n<b>Type: </b>{typ}'
+            msg += f'\n\n<b>Tipe: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
-                msg += f'\n<b>SubFolders: </b>{folders}'
-                msg += f'\n<b>Files: </b>{files}'
+                msg += f'\n<b>SubFolder: </b>{folders}'
+                msg += f'\n<b>File: </b>{files}'
             msg += f'\n\n<b>cc: </b>{self.tag}'
             buttons = ButtonMaker()
             link = short_url(link)
             buttons.buildbutton("☁️ Drive Link", link)
-            LOGGER.info(f'Done Uploading {name}')
+            LOGGER.info(f'Selesai Mengunggah {name}')
             if INDEX_URL is not None:
                 url_path = requests.utils.quote(f'{name}')
                 share_url = f'{INDEX_URL}/{url_path}'
@@ -374,14 +374,9 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
             pass
 
     if not is_url(link) and not is_magnet(link) and not ospath.exists(link):
-        help_msg = "<b>Send link along with command line:</b>"
-        help_msg += "\n<code>/command</code> {link} |newname pswd: mypassword [𝚣𝚒𝚙/𝚞𝚗𝚣𝚒𝚙]"
-        help_msg += "\n\n<b>By replying to link or file:</b>"
-        help_msg += "\n<code>/command</code> |newname pswd: mypassword [𝚣𝚒𝚙/𝚞𝚗𝚣𝚒𝚙]"
-        help_msg += "\n\n<b>Direct link authorization:</b>"
-        help_msg += "\n<code>/command</code> {link} |newname pswd: mypassword\nusername\npassword"
-        help_msg += "\n\n<b>Qbittorrent selection:</b>"
-        help_msg += "\n<code>/qbcommand</code> <b>s</b> {link} or by replying to {file}"
+        help_msg = "<b>Link Nya Mana Bambank!</b>"
+        help_msg += "\n\n"
+        help_msg += "\nPowered By : ZenitsuXD #M•R•T™"
         return sendMessage(help_msg, bot, update)
 
     LOGGER.info(link)
@@ -393,7 +388,7 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
             try:
                 is_gdtot = is_gdtot_link(link)
                 link = direct_link_generator(link)
-                LOGGER.info(f"Generated link: {link}")
+                LOGGER.info(f"Tautan yang dihasilkan: {link}")
             except DirectDownloadLinkException as e:
                 LOGGER.info(str(e))
                 if str(e).startswith('ERROR:'):
@@ -412,35 +407,35 @@ def _mirror(bot, update, isZip=False, extract=False, isQbit=False, isLeech=False
                         t.write(resp.content)
                     link = str(file_name)
                 else:
-                    return sendMessage(f"ERROR: link got HTTP response: {resp.status_code}", bot, update)
+                    return sendMessage(f"ERROR: tautan mendapat respons HTTP: {resp.status_code}", bot, update)
             except Exception as e:
                 error = str(e).replace('<', ' ').replace('>', ' ')
-                if error.startswith('No connection adapters were found for'):
+                if error.startswith('Tidak ada adaptor koneksi yang ditemukan untuk'):
                     link = error.split("'")[1]
                 else:
                     LOGGER.error(str(e))
                     return sendMessage(tag + " " + error, bot, update)
         else:
-            msg = "Qb commands for torrents only. if you are trying to dowload torrent then report."
+            msg = "perintah Qb untuk torrent saja. jika Anda mencoba mengunduh torrent, laporkan."
             return sendMessage(msg, bot, update)
 
     listener = MirrorListener(bot, update, isZip, extract, isQbit, isLeech, pswd, tag)
 
     if is_gdrive_link(link):
         if not isZip and not extract and not isLeech:
-            gmsg = f"Use /{BotCommands.CloneCommand} to clone Google Drive file/folder\n\n"
-            gmsg += f"Use /{BotCommands.ZipMirrorCommand} to make zip of Google Drive folder\n\n"
-            gmsg += f"Use /{BotCommands.UnzipMirrorCommand} to extracts Google Drive archive file"
+            gmsg = f"Gunakan /{BotCommands.CloneCommand} untuk mengkloning file/folder Google Drive\n\n"
+            gmsg += f"Gunakan /{BotCommands.ZipMirrorCommand} untuk membuat zip folder Google Drive\n\n"
+            gmsg += f"Gunakan /{BotCommands.UnzipMirrorCommand} untuk mengekstrak file arsip Google Drive"
             return sendMessage(gmsg, bot, update)
         Thread(target=add_gd_download, args=(link, listener, is_gdtot)).start()
 
     elif is_mega_link(link):
         if BLOCK_MEGA_LINKS:
-            sendMessage("Mega links are blocked!", bot, update)
+            sendMessage("Tautan MEGA diblokir!", bot, update)
             return
         link_type = get_mega_link_type(link)
         if link_type == "folder" and BLOCK_MEGA_FOLDER:
-            sendMessage("Mega folder are blocked!", bot, update)
+            sendMessage("Folder MEGA diblokir!", bot, update)
         else:
             Thread(target=add_mega_download, args=(link, f'{DOWNLOAD_DIR}{listener.uid}/', listener)).start()
 
