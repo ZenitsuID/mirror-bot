@@ -4,32 +4,32 @@ from bot import AUTHORIZED_CHATS, SUDO_USERS, OWNER_ID, download_dict, download_
 
 
 class CustomFilters:
-    class __OwnerFilter(MessageFilter):
-        def filter(self, message: Message):
+    class _OwnerFilter(MessageFilter):
+        def filter(self, message):
             return bool(message.from_user.id == OWNER_ID)
 
-    owner_filter = __OwnerFilter()
+    owner_filter = _OwnerFilter()
 
-    class __AuthorizedUserFilter(MessageFilter):
-        def filter(self, message: Message):
+    class _AuthorizedUserFilter(MessageFilter):
+        def filter(self, message):
             id = message.from_user.id
             return bool(id in AUTHORIZED_CHATS or id in SUDO_USERS or id == OWNER_ID)
 
-    authorized_user = __AuthorizedUserFilter()
+    authorized_user = _AuthorizedUserFilter()
 
-    class __AuthorizedChat(MessageFilter):
-        def filter(self, message: Message):
+    class _AuthorizedChat(MessageFilter):
+        def filter(self, message):
             return bool(message.chat.id in AUTHORIZED_CHATS)
 
-    authorized_chat = __AuthorizedChat()
+    authorized_chat = _AuthorizedChat()
 
-    class __SudoUser(MessageFilter):
-        def filter(self, message: Message):
+    class _SudoUser(MessageFilter):
+        def filter(self, message):
             return bool(message.from_user.id in SUDO_USERS)
 
-    sudo_user = __SudoUser()
+    sudo_user = _SudoUser()
 
-    class __MirrorOwner(MessageFilter):
+    class _MirrorOwner(MessageFilter):
         def filter(self, message: Message):
             user_id = message.from_user.id
             if user_id == OWNER_ID:
@@ -48,9 +48,4 @@ class CustomFilters:
             # Cancelling by replying to original mirror message
             reply_user = message.reply_to_message.from_user.id
             return bool(reply_user == user_id)
-
-    mirror_owner_filter = __MirrorOwner()
-
-    def _owner_query(user_id):
-        return bool(user_id == OWNER_ID or user_id in SUDO_USERS)
-
+    mirror_owner_filter = _MirrorOwner()

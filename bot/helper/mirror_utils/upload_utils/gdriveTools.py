@@ -16,7 +16,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 from telegram import InlineKeyboardMarkup
-from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type, before_log, RetryError
+from tenacity import *
 
 from bot.helper.telegram_helper.button_build import ButtonMaker
 from bot import parent_id, DOWNLOAD_DIR, IS_TEAM_DRIVE, INDEX_URL, USE_SERVICE_ACCOUNTS, BUTTON_FOUR_NAME, \
@@ -58,7 +58,6 @@ class GoogleDriveHelper:
         self.is_downloading = False
         self.is_cloning = False
         self.is_cancelled = False
-        self.is_errored = False
         self.status = None
         self.dstatus = None
         self.updater = None
@@ -164,7 +163,7 @@ class GoogleDriveHelper:
                                                    body=permissions).execute()
 
     @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(3),
-           retry=(retry_if_exception_type(HttpError) | retry_if_exception_type(IOError)), before=before_log(LOGGER, logging.DEBUG))
+           retry=retry_if_exception_type(HttpError), before=before_log(LOGGER, logging.DEBUG))
     def __upload_file(self, file_path, file_name, mime_type, parent_id):
         # File body description
         file_metadata = {
@@ -215,7 +214,8 @@ class GoogleDriveHelper:
                         LOGGER.info(f"Got: {reason}, Trying Again.")
                         return self.__upload_file(file_path, file_name, mime_type, parent_id)
                     else:
-                        LOGGER.error(f"Got: {reason}")
+                        self.is_cancelled = True
+                        LOGGER.info(f"Got: {reason}")
                         raise err
         if self.is_cancelled:
             return
@@ -263,16 +263,14 @@ class GoogleDriveHelper:
                 err = e
             LOGGER.error(err)
             self.__listener.onUploadError(str(err))
-            self.is_errored = True
+            self.is_cancelled = True
         finally:
             self.updater.cancel()
-            if self.is_cancelled and not self.is_errored:
+            if self.is_cancelled:
                 if mime_type == 'Folder':
                     LOGGER.info("Deleting uploaded data from Drive...")
                     link = f"https://drive.google.com/folderview?id={dir_id}"
                     self.deletefile(link)
-                return
-            elif self.is_errored:
                 return
         self.__listener.onUploadComplete(link, size, self.__total_files, self.__total_folders, mime_type, self.name)
 
@@ -303,7 +301,7 @@ class GoogleDriveHelper:
                             return self.__copyFile(file_id, dest_id)
                     else:
                         self.is_cancelled = True
-                        LOGGER.error(f"Got: {reason}")
+                        LOGGER.info(f"Got: {reason}")
                         raise err
                 else:
                     raise err
@@ -901,7 +899,7 @@ class GoogleDriveHelper:
                 break
 
     @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(3),
-           retry=(retry_if_exception_type(HttpError) | retry_if_exception_type(IOError)), before=before_log(LOGGER, logging.DEBUG))
+           retry=retry_if_exception_type(HttpError), before=before_log(LOGGER, logging.DEBUG))
     def __download_file(self, file_id, path, filename, mime_type):
         request = self.__service.files().get_media(fileId=file_id)
         filename = filename.replace('/', '')
@@ -931,7 +929,8 @@ class GoogleDriveHelper:
                             LOGGER.info(f"Got: {reason}, Trying Again...")
                             return self.__download_file(file_id, path, filename, mime_type)
                     else:
-                        LOGGER.error(f"Got: {reason}")
+                        self.is_cancelled = True
+                        LOGGER.info(f"Got: {reason}")
                         raise err
         self._file_downloaded_bytes = 0
 

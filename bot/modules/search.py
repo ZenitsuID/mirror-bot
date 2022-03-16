@@ -1,3 +1,5 @@
+import itertools
+
 from requests import get as rget
 from time import sleep
 from threading import Thread
@@ -6,7 +8,7 @@ from urllib.parse import quote
 from telegram import InlineKeyboardMarkup
 from telegram.ext import CommandHandler, CallbackQueryHandler
 
-from bot import dispatcher, LOGGER, SEARCH_API_LINK, SEARCH_PLUGINS, get_client, SEARCH_LIMIT
+from bot import dispatcher, LOGGER, SEARCH_API_LINK, SEARCH_PLUGINS, get_client
 from bot.helper.ext_utils.telegraph_helper import telegraph
 from bot.helper.telegram_helper.message_utils import editMessage, sendMessage, sendMarkup
 from bot.helper.telegram_helper.filters import CustomFilters
@@ -27,10 +29,13 @@ if SEARCH_PLUGINS is not None:
 SITES = {
     "1337x": "1337x",
     "yts": "YTS",
+    "eztv": "EzTv",
     "tgx": "TorrentGalaxy",
     "torlock": "Torlock",
     "piratebay": "PirateBay",
     "nyaasi": "NyaaSi",
+    "rarbg": "Rarbg",
+    "ettv": "Ettv",
     "zooqle": "Zooqle",
     "kickass": "KickAss",
     "bitsearch": "Bitsearch",
@@ -39,11 +44,10 @@ SITES = {
     "limetorrent": "LimeTorrent",
     "torrentfunk": "TorrentFunk",
     "torrentproject": "TorrentProject",
-    "libgen": "Libgen",
     "all": "All"
 }
 
-TELEGRAPH_LIMIT = 200
+SEARCH_LIMIT = 200
 
 
 def torser(update, context):
@@ -51,22 +55,22 @@ def torser(update, context):
     try:
         key = update.message.text.split(" ", maxsplit=1)[1]
     except IndexError:
-        return sendMessage("Send a search key along with command", context.bot, update.message)
+        return sendMessage("Send a search key along with command", context.bot, update)
     if SEARCH_API_LINK is not None and SEARCH_PLUGINS is not None:
         buttons = button_build.ButtonMaker()
         buttons.sbutton('Api', f"torser {user_id} api")
         buttons.sbutton('Plugins', f"torser {user_id} plugin")
         buttons.sbutton("Cancel", f"torser {user_id} cancel")
         button = InlineKeyboardMarkup(buttons.build_menu(2))
-        sendMarkup('Choose tool to search:', context.bot, update.message, button)
+        sendMarkup('Choose tool to search:', context.bot, update, button)
     elif SEARCH_API_LINK is not None and SEARCH_PLUGINS is None:
         button = _api_buttons(user_id)
-        sendMarkup('Choose site to search:', context.bot, update.message, button)
+        sendMarkup('Choose site to search:', context.bot, update, button)
     elif SEARCH_API_LINK is None and SEARCH_PLUGINS is not None:
         button = _plugin_buttons(user_id)
-        sendMarkup('Choose site to search:', context.bot, update.message, button)
+        sendMarkup('Choose site to search:', context.bot, update, button)
     else:
-        return sendMessage("No API link or search PLUGINS added for this function", context.bot, update.message)
+        return sendMessage("No API link or search PLUGINS added for this function", context.bot, update)
 
 def torserbut(update, context):
     query = update.callback_query
@@ -101,21 +105,19 @@ def torserbut(update, context):
 def _search(key, site, message, tool):
     LOGGER.info(f"Searching: {key} from {site}")
     if tool == 'api':
-        if site == 'all':
-            api = f"{SEARCH_API_LINK}/api/v1/all/search?query={key}&limit={SEARCH_LIMIT}"
-        else:
-            api = f"{SEARCH_API_LINK}/api/v1/search?site={site}&query={key}&limit={SEARCH_LIMIT}"
+        api = f"{SEARCH_API_LINK}/api/{site}/{key}"
         try:
             resp = rget(api)
             search_results = resp.json()
-            if "error" not in search_results.keys():
-                msg = f"<b>Found {min(search_results['total'], TELEGRAPH_LIMIT)}</b>"
-                msg += f" <b>result(s) for <i>{key}</i>\nTorrent Site:- <i>{SITES.get(site)}</i></b>"
-                search_results = search_results['data']
+            if site == "all":
+                search_results = list(itertools.chain.from_iterable(search_results))
+            if isinstance(search_results, list):
+                msg = f"<b>Found {min(len(search_results), SEARCH_LIMIT)}</b>"
+                msg += f" <b>result for <i>{key}</i>\nTorrent Site:- <i>{SITES.get(site)}</i></b>"
             else:
                 return editMessage(f"No result found for <i>{key}</i>\nTorrent Site:- <i>{SITES.get(site)}</i>", message)
         except Exception as e:
-            return editMessage(str(e), message)
+            editMessage(str(e), message)
     else:
         client = get_client()
         search = client.search_start(pattern=str(key), plugins=str(site), category='all')
@@ -129,8 +131,8 @@ def _search(key, site, message, tool):
         search_results = dict_search_results.results
         total_results = dict_search_results.total
         if total_results != 0:
-            msg = f"<b>Found {min(total_results, TELEGRAPH_LIMIT)}</b>"
-            msg += f" <b>result(s) for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i></b>"
+            msg = f"<b>Found {min(total_results, SEARCH_LIMIT)}</b>"
+            msg += f" <b>result for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i></b>"
         else:
             return editMessage(f"No result found for <i>{key}</i>\nTorrent Site:- <i>{site.capitalize()}</i>", message)
     link = _getResult(search_results, key, message, tool)
@@ -143,31 +145,31 @@ def _search(key, site, message, tool):
 
 def _getResult(search_results, key, message, tool):
     telegraph_content = []
-    msg = f"<h4>Search Result(s) For {key}</h4>"
+    msg = f"<h4>Search Result For {key}</h4>"
     for index, result in enumerate(search_results, start=1):
         if tool == 'api':
-            if 'name' in result.keys():
-                msg += f"<code><a href='{result['url']}'>{escape(result['name'])}</a></code><br>"
-            elif 'title' in result.keys():
-                msg += f"<code><a href='{result['url']}'>{escape(result['title'])}</a></code><br>"
-            if 'torrents' in result.keys():
-                for subres in result['torrents']:
-                    msg += f"<b>Quality: </b>{subres['quality']} | <b>Type: </b>{subres['type']} | <b>Size: </b>{subres['size']}<br>"
-                    if 'torrent' in subres.keys():
-                        msg += f"<a href='{subres['torrent']}'>Direct Link</a><br>"
-                    elif 'magnet' in subres.keys():
-                        msg += f"<b>Share Magnet to</b> <a href='http://t.me/share/url?url={subres['magnet']}'>Telegram</a><br>"
-                msg += '<br>'
-            else:
-                msg += f"<b>Size: </b>{result['size']}<br>"
-                try:
-                    msg += f"<b>Seeders: </b>{result['seeders']} | <b>Leechers: </b>{result['leechers']}<br>"
-                except:
-                    pass
-                if 'torrent' in result.keys():
-                    msg += f"<a href='{result['torrent']}'>Direct Link</a><br><br>"
-                elif 'magnet' in result.keys():
-                    msg += f"<b>Share Magnet to</b> <a href='http://t.me/share/url?url={quote(result['magnet'])}'>Telegram</a><br><br>"
+            try:
+                msg += f"<code><a href='{result['Url']}'>{escape(result['Name'])}</a></code><br>"
+                if "Files" in result.keys():
+                    for subres in result['Files']:
+                        msg += f"<b>Quality: </b>{subres['Quality']} | <b>Size: </b>{subres['Size']}<br>"
+                        try:
+                            msg += f"<a href='{subres['Torrent']}'>Direct Link</a><br>"
+                        except KeyError:
+                            msg += f"<b>Share Magnet to</b> <a href='http://t.me/share/url?url={subres['Magnet']}'>Telegram</a><br>"
+                else:
+                    msg += f"<b>Size: </b>{result['Size']}<br>"
+                    msg += f"<b>Seeders: </b>{result['Seeders']} | <b>Leechers: </b>{result['Leechers']}<br>"
+            except KeyError:
+                pass
+            try:
+                msg += f"<b>Share Magnet to</b> <a href='http://t.me/share/url?url={quote(result['Magnet'])}'>Telegram</a><br><br>"
+            except KeyError:
+                pass
+            try:
+                msg += f"<a href='{result['Torrent']}'>Direct Link</a><br><br>"
+            except KeyError:
+                msg += "<br>"
         else:
             msg += f"<a href='{result.descrLink}'>{escape(result.fileName)}</a><br>"
             msg += f"<b>Size: </b>{get_readable_file_size(result.fileSize)}<br>"
@@ -182,7 +184,7 @@ def _getResult(search_results, key, message, tool):
            telegraph_content.append(msg)
            msg = ""
 
-        if index == TELEGRAPH_LIMIT:
+        if index == SEARCH_LIMIT:
             break
 
     if msg != "":
