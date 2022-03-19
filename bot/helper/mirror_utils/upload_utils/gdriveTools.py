@@ -382,7 +382,7 @@ class GoogleDriveHelper:
                 msg += f'\n<b>📦 Size: </b>{get_readable_file_size(int(meta.get("size", 0)))}'
                 msg += f'\n<b>🌀 Type: </b>{mime_type}'
                 msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
-            msg += f'\n\n<b>🗳 Powered By</b> @ZenitsuXD'
+                msg += f'\n\n<b>🗳 Powered By</b> @ZenitsuXD'
                 if INDEX_URL is not None:
                     url_path = rquote(f'{file.get("name")}')
                     url = f'{INDEX_URL}/{url_path}'
