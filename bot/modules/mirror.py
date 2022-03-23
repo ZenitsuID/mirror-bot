@@ -220,12 +220,12 @@ class MirrorListener:
             else:
                 update_all_messages()
         else:
+            msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
             msg += f'\n<b>🌀 Type: </b>{typ}'
             if ospath.isdir(f'{DOWNLOAD_DIR}{self.uid}/{name}'):
                 msg += f'\n<b>🗂️ SubFolders: </b>{folders}'
                 msg += f'\n<b>📂 Files: </b>{files}'
             msg += f'\n<b>👤 By: </b>{self.tag}'
-            msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
             msg += f'\n\n<b>🗳 Powered By</b> @ZenitsuXD'
             buttons = ButtonMaker()
             link = short_url(link)

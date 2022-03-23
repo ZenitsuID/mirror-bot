@@ -19,7 +19,6 @@ from .helper.telegram_helper.filters import CustomFilters
 from .helper.telegram_helper.button_build import ButtonMaker
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, delete, speedtest, count, leech_settings, search, rss
 
-
 def stats(update, context):
     currentTime = get_readable_time(time() - botStartTime)
     total, used, free, disk= disk_usage('/')
@@ -48,7 +47,7 @@ def stats(update, context):
             f'<b>├🔽 Download:</b> {recv}\n'\
             f'<b>├🖥️ CPU:</b> {cpuUsage}%\n'\
             f'<b>├🎮 RAM:</b> {mem_p}%\n'\
-            f'<b>├💽DISK:</b> {disk}%\n'\
+            f'<b>├💽 DISK:</b> {disk}%\n'\
             f'<b>├🛡️ Physical Cores:</b> {p_core}\n'\
             f'<b>├⚔️ Total Cores:</b> {t_core}\n'\
             f'<b>├⚖️ SWAP:</b> {swap_t} | <b>Used:</b> {swap_p}%\n'\
@@ -71,7 +70,7 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
 '''
         sendMarkup(start_string, context.bot, update.message, reply_markup)
     else:
-        sendMarkup('Not Authorized user, deploy your own mirror-leech bot', context.bot, update.message, reply_markup)
+        sendMarkup('Oh Sorry, you don't have permission yet, please message to @ZenitsuXD for ask permission', context.bot, update.message, reply_markup)
 
 def restart(update, context):
     restart_message = sendMessage("Restarting...", context.bot, update.message)
@@ -174,7 +173,7 @@ help_string_telegraph = f'''<br>
 '''
 
 help = telegraph.create_page(
-        title='Mirror-Leech-Bot Help',
+        title='Emilia--Drive-Bot Help',
         content=help_string_telegraph,
     )["path"]
 

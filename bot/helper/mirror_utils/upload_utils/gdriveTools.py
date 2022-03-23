@@ -379,9 +379,9 @@ class GoogleDriveHelper:
                 buttons.buildbutton("♻️ Drive Link ♻️", durl)
                 if mime_type is None:
                     mime_type = 'File'
+                msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
                 msg += f'\n<b>📦 Size: </b>{get_readable_file_size(int(meta.get("size", 0)))}'
                 msg += f'\n<b>🌀 Type: </b>{mime_type}'
-                msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
                 msg += f'\n\n<b>🗳 Powered By</b> @ZenitsuXD'
                 if INDEX_URL is not None:
                     url_path = rquote(f'{file.get("name")}')
@@ -756,6 +756,7 @@ class GoogleDriveHelper:
             if mime_type == self.__G_DRIVE_DIR_MIME_TYPE:
                 self.__gDrive_directory(meta)
                 msg += f'<b>📁 Filename: </b><code>{name}</code>'
+                msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
                 msg += f'\n<b>📦 Size: </b>{get_readable_file_size(self.__total_bytes)}'
                 msg += '\n<b>🌀 Type: </b>Folder'
                 msg += f'\n<b>📚 SubFolders: </b>{self.__total_folders}'
@@ -769,7 +770,6 @@ class GoogleDriveHelper:
                 msg += f'\n<b>📦 Size: </b>{get_readable_file_size(self.__total_bytes)}'
                 msg += f'\n<b>🌀 Type: </b>{mime_type}'
                 msg += f'\n<b>📂 Files: </b>{self.__total_files}'
-                msg += f'\n<b>✅ Status: </b>Succesfully Uploaded'
                 msg += f'\n\n<b>🗳 Powered By</b> @ZenitsuXD'
         except Exception as err:
             if isinstance(err, RetryError):
