@@ -366,8 +366,7 @@ def _mirror(bot, message, isZip=False, extract=False, isQbit=False, isLeech=Fals
             pass
 
     if not is_url(link) and not is_magnet(link) and not ospath.exists(link):
-        help_msg = "<b>Link nya mana bambank 🙀</b>"
-        help_msg += "\nMirror link bokep gua jitak lu 😾"
+        help_msg = "No download source provided"
         return sendMessage(help_msg, bot, message)
 
     LOGGER.info(link)

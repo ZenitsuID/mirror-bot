@@ -127,7 +127,7 @@ def get_readable_message():
             START = COUNT
         for index, download in enumerate(list(download_dict.values())[START:], start=1):
             msg += f"<b>📁 Filename:</b> <code>{escape(str(download.name()))}</code>"
-            msg += f"\n<b>❓ Status:</b> <i>{download.status()}</i>"
+            msg += f"\n<b>❔ Status:</b> <i>{download.status()}</i>"
             if download.status() not in [
                 MirrorStatus.STATUS_ARCHIVING,
                 MirrorStatus.STATUS_EXTRACTING,
@@ -141,7 +141,8 @@ def get_readable_message():
                     msg += f"\n<b>📤 Uploaded:</b> {get_readable_file_size(download.processed_bytes())} of {download.size()}"
                 else:
                     msg += f"\n<b>📥 Downloaded:</b> {get_readable_file_size(download.processed_bytes())} of {download.size()}"
-                msg += f"\n<b>🚀 Speed:</b> {download.speed()} | <b>ETA:</b> {download.eta()}"
+                msg += f"\n<b>🚀 Speed:</b> {download.speed()}"
+                msg += f"\n<b>⏱️ ETA:</b> {download.eta()}"
                 try:
                     msg += f"\n<b>✳️ Seeders:</b> {download.aria_download().num_seeders}" \
                            f" | <b>❇️ Peers:</b> {download.aria_download().connections}"
@@ -152,7 +153,7 @@ def get_readable_message():
                            f" | <b>❇️ Leechers:</b> {download.torrent_info().num_leechs}"
                 except:
                     pass
-                msg += f"\n❌ <code>/{BotCommands.CancelMirror} {download.gid()}</code>"
+                msg += f"\n<b>❌ Stop:</b> <code>/{BotCommands.CancelMirror} {download.gid()}</code>"
             elif download.status() == MirrorStatus.STATUS_SEEDING:
                 msg += f"\n<b>📦 Size: </b>{download.size()}"
                 msg += f"\n<b>🚀 Speed: </b>{get_readable_file_size(download.torrent_info().upspeed)}/s"
@@ -167,6 +168,7 @@ def get_readable_message():
                 break
         free = get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)
         currentTime = get_readable_time(time() - botStartTime)
+        bmsg += f"\n\n<b>SPEEDTEST</b>
         bmsg = f"<b>🖥 ️CPU:</b> {cpu_percent()}% | <b>💿 FREE:</b> {free}"
         for download in list(download_dict.values()):
             spd = download.speed()
@@ -182,6 +184,7 @@ def get_readable_message():
                     upspeed_bytes += float(spd.split('M')[0]) * 1048576
         dlspeed = get_readable_file_size(dlspeed_bytes)
         upspeed = get_readable_file_size(upspeed_bytes)
+        bmsg += f"\n\n<b>PERFORMANCE</b>
         bmsg += f"\n<b>🎮 RAM:</b> {virtual_memory().percent}% | <b>⏳ UPTIME:</b> {currentTime}"
         bmsg += f"\n<b>🔽 DL:</b> {dlspeed}/s | <b>🔼 UL:</b> {upspeed}/s"
         if STATUS_LIMIT is not None and tasks > STATUS_LIMIT:
