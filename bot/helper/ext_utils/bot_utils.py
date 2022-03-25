@@ -168,7 +168,7 @@ def get_readable_message():
                 break
         free = get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)
         currentTime = get_readable_time(time() - botStartTime)
-        bmsg += f"\n\n<b>SPEEDTEST</b>"
+        bmsg = f"\n\n<b>SPEEDTEST</b>"
         bmsg = f"<b>🖥 ️CPU:</b> {cpu_percent()}% | <b>💿 FREE:</b> {free}"
         for download in list(download_dict.values()):
             spd = download.speed()
