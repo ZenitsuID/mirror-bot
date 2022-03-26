@@ -10,11 +10,9 @@ flask
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
-heroku3
 gunicorn
 lk21
 lxml
-messages
 pillow
 psutil
 psycopg2-binary
